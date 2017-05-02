@@ -94,5 +94,6 @@ public class FullyLinearLayoutManager extends LinearLayoutManager {
         return isScrollEnabled && super.canScrollVertically();
     }
 
+
 }
 

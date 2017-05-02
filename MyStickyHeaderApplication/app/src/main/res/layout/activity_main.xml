@@ -28,7 +28,7 @@
         app:tabIndicatorColor="@android:color/darker_gray"
         android:layout_height="50dp"/>
 
-    <android.support.v4.view.ViewPager
+    <com.practice.hs.mystickyheaderapplication.CustomViewPage
         android:id="@+id/vpContent"
         android:layout_below="@id/tlTitle"
         android:layout_width="match_parent"

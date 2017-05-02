@@ -1,13 +1,11 @@
 package com.practice.hs.mystickyheaderapplication;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.ScrollView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,7 @@ public class MainActivity extends AppCompatActivity implements StickyContentFrag
     @BindView(R.id.vpContent)
     ViewPager mViewPage;
     @BindView(R.id.svMain)
-    ScrollView mScrollView;
+    StickyScrollView mScrollView;
 
     private List<Fragment> mFragmentList;
     private List<String> mTitleList;
@@ -52,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements StickyContentFrag
         mStickyViewPageAdapter = new StickyViewPageAdapter(getSupportFragmentManager(),mFragmentList,mTitleList);
         mViewPage.setAdapter(mStickyViewPageAdapter);
         mTabLayoutTitle.setupWithViewPager(mViewPage);
-        mScrollView.smoothScrollTo(0,0);
+//        mScrollView.smoothScrollTo(0,0);
+
     }
 
     @Override
