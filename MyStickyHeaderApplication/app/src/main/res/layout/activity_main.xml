@@ -1,13 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.practice.hs.mystickyheaderapplication.StickyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true"
+    android:id="@+id/svMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.practice.hs.mystickyheaderapplication.MainActivity">
 
-    <ImageView
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tHeader"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:gravity="center"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:text="Header"/>
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tlTitle"
+        android:layout_below="@id/tHeader"
+        android:layout_width="match_parent"
+        app:tabIndicatorColor="@android:color/darker_gray"
+        android:layout_height="50dp"/>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vpContent"
+        android:layout_below="@id/tlTitle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>
+
+</com.practice.hs.mystickyheaderapplication.StickyScrollView>
