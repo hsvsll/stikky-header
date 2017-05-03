@@ -1,38 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.practice.hs.mystickyheaderapplication.StickyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fillViewport="true"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/svMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.practice.hs.mystickyheaderapplication.MainActivity">
 
-    <RelativeLayout
+    <com.practice.hs.mystickyheaderapplication.StickyLayout
+        android:id="@+id/sticky_layout"
+        android:layout_marginTop="0dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tHeader"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:text="Header"/>
+        <TextView
+            android:id="@+id/sticky_header"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/colorPrimary"
+            android:gravity="center"
+            android:text="Header"
+            android:textColor="@android:color/white" />
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tlTitle"
-        android:layout_below="@id/tHeader"
-        android:layout_width="match_parent"
-        app:tabIndicatorColor="@android:color/darker_gray"
-        android:layout_height="50dp"/>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tlTitle"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@id/sticky_header"
+            app:tabIndicatorColor="@android:color/darker_gray" />
 
-    <com.practice.hs.mystickyheaderapplication.CustomViewPage
-        android:id="@+id/vpContent"
-        android:layout_below="@id/tlTitle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/sticky_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tlTitle" />
+
+    </com.practice.hs.mystickyheaderapplication.StickyLayout>
 </RelativeLayout>
-
-</com.practice.hs.mystickyheaderapplication.StickyScrollView>

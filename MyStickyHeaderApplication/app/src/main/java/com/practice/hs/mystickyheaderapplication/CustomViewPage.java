@@ -5,14 +5,17 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Scroller;
 
 /**
  * Created by huha on 2017/5/2.
  */
 
 public class CustomViewPage extends ViewPager{
-    private float mLastMotionY,mLastMotionX;
+    private int mLastMotionY = 0;
+    private int mLastInterceptY = 0,mLastInterceptX = 0;
     private final static String TAG = CustomViewPage.class.getName();
+    private Scroller mScroller;
 
     private int mMaxHeightSize = 0;
     private Boolean hasMeasureView = false;
@@ -28,7 +31,7 @@ public class CustomViewPage extends ViewPager{
     }
 
     private void init() {
-
+        mScroller = new Scroller(getContext());
         this.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -38,7 +41,7 @@ public class CustomViewPage extends ViewPager{
             }
         });
 
-        this.setOnPageChangeListener(new OnPageChangeListener() {
+        this.addOnPageChangeListener(new OnPageChangeListener() {
 
             @Override
             public void onPageSelected(int arg0) {
@@ -118,18 +121,50 @@ public class CustomViewPage extends ViewPager{
 //        int action = ev.getAction();
 //        switch (action){
 //            case MotionEvent.ACTION_DOWN:
-//                mLastMotionY = curY;
-//                mLastMotionX = curX;
-//                resume = false;
+////                mLastMotionY = curY;
+//                resume = true;
 //                break;
 //            case MotionEvent.ACTION_MOVE:
 ////                // deltaY > 0 是向下运动,< 0是向上运动
-////                float deltaY = y - mLastMotionY;
-////                float deltaX = x - mLastMotionX;
+//                float deltaY = curY - mLastInterceptY;
+//                float deltaX = curX - mLastInterceptX;
+//                if(Math.abs(deltaX) < Math.abs(deltaY)){
+//                }
+//                resume = true;
 //                break;
 //            case MotionEvent.ACTION_UP:
+//                resume = false;
+//                break;
+//            default:
+//                resume = false;
 //                break;
 //        }
+//        mLastInterceptX = curX;
+//        mLastInterceptY = curY;
 //        return resume;
 //    }
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent ev) {
+//        int y = (int) ev.getRawY();
+//        int x = (int) ev.getRawX();
+//        if(ev.getAction() == MotionEvent.ACTION_MOVE){
+//            int deltaY = y - mLastInterceptY;
+//            int deltaX = x - mLastInterceptX;
+//            if(Math.abs(deltaX) < Math.abs(deltaY)){
+//                scrollBy(0, -deltaY);
+////                Log.i("TAG","CustomViewPage  ACTION_MOVE  垂直滑动");
+//            }else {
+////                Log.i("TAG","CustomViewPage  ACTION_MOVE  水平滑动");
+//                return super.onTouchEvent(ev);
+//            }
+//        }else if(ev.getAction() == MotionEvent.ACTION_DOWN){
+//            Log.i("TAG","CustomViewPage  onTouchEvent  ACTION_DOWN");
+//        }else if(ev.getAction() == MotionEvent.ACTION_UP){
+////            Log.i("TAG","CustomViewPage  onTouchEvent  ACTION_UP");
+//        }
+//        mLastMotionY = y;
+//        return true;
+//    }
+
 }
