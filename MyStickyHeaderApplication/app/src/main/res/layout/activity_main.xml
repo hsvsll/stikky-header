@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.practice.hs.mystickyheaderapplication.MainActivity">
 
-    <com.practice.hs.mystickyheaderapplication.StickyLayout
+    <com.practice.hs.mystickyheaderapplication.MyStickyLayout
         android:id="@+id/sticky_layout"
         android:layout_marginTop="0dp"
         android:orientation="vertical"
@@ -36,5 +36,5 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tlTitle" />
 
-    </com.practice.hs.mystickyheaderapplication.StickyLayout>
+    </com.practice.hs.mystickyheaderapplication.MyStickyLayout>
 </RelativeLayout>

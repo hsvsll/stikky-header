@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @BindView(R.id.sticky_content)
     ViewPager mViewPage;
     @BindView(R.id.sticky_layout)
-    StickyLayout mLayout;
+    MyStickyLayout mLayout;
     @BindView(R.id.sticky_header)
     TextView mHeaderTextView;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         mViewPage.addOnPageChangeListener(this);
         mViewPage.setAdapter(mStickyViewPageAdapter);
         mTabLayoutTitle.setupWithViewPager(mViewPage);
-        mLayout.setOnGiveUpTouchEventListener(this);
+//        mLayout.setOnGiveUpTouchEventListener(this);
     }
 
 
