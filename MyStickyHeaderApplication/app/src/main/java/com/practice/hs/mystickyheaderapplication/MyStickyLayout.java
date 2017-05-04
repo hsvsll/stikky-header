@@ -99,12 +99,15 @@ public class MyStickyLayout extends LinearLayout {
                 mLastY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
+                int diffX = x - mLastInterceptX;
                 int diffY = y - mLastInterceptY;
                 if(status == STATUS_EXPANDED && diffY < -mTouchSlop){
                     intercept = true;
                 }else if( mGiveUpTouchEventListener != null && mGiveUpTouchEventListener.giveUpTouchEvent(ev) && diffY > mTouchSlop){
                     intercept = true;
-                }else {
+                }else if(Math.abs(diffX) >= Math.abs(diffY)){
+                    intercept = false;
+                }else if( y <= getHeaderHeight()){
                     intercept = false;
                 }
 
