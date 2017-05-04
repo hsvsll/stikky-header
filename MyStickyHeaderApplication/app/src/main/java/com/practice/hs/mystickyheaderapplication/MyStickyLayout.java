@@ -83,8 +83,6 @@ public class MyStickyLayout extends LinearLayout {
         mGiveUpTouchEventListener = l;
     }
 
-
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
@@ -107,9 +105,10 @@ public class MyStickyLayout extends LinearLayout {
                     intercept = true;
                 }else if(Math.abs(diffX) >= Math.abs(diffY)){
                     intercept = false;
-                }else if( y <= getHeaderHeight()){
-                    intercept = false;
                 }
+//                else if( y <= getHeaderHeight()){
+//                    intercept = false;
+//                }
 
                 break;
             case MotionEvent.ACTION_UP:
@@ -122,6 +121,11 @@ public class MyStickyLayout extends LinearLayout {
         }
         Log.d("TAG", "intercept=" + intercept );
         return intercept;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
