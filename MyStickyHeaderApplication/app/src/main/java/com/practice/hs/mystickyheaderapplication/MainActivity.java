@@ -14,7 +14,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener ,StickyLayout.OnGiveUpTouchEventListener {
+public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener ,MyStickyLayout.OnGiveUpTouchEventListener {
     @BindView(R.id.tlTitle)
     TabLayout mTabLayoutTitle;
     @BindView(R.id.sticky_content)
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         mViewPage.addOnPageChangeListener(this);
         mViewPage.setAdapter(mStickyViewPageAdapter);
         mTabLayoutTitle.setupWithViewPager(mViewPage);
-//        mLayout.setOnGiveUpTouchEventListener(this);
+        mLayout.setOnGiveUpTouchEventListener(this);
     }
 
 

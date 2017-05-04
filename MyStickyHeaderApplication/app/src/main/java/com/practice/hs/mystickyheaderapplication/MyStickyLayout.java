@@ -3,10 +3,7 @@ package com.practice.hs.mystickyheaderapplication;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Build;
-import android.support.v4.animation.ValueAnimatorCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -26,6 +23,16 @@ public class MyStickyLayout extends LinearLayout {
     private int mHeaderHeight;
     private int mOriginalHeight;
     private boolean mInitDataSucceed = false;
+    private int status = STATUS_EXPANDED;
+    private static final int STATUS_EXPANDED = 1;
+    private static final int STATUS_COLLAPSED = 2;
+
+    public interface OnGiveUpTouchEventListener {
+        boolean giveUpTouchEvent(MotionEvent event);
+    }
+
+    private OnGiveUpTouchEventListener mGiveUpTouchEventListener;
+
     public MyStickyLayout(Context context) {
         super(context);
     }
@@ -72,6 +79,11 @@ public class MyStickyLayout extends LinearLayout {
         return mHeaderHeight;
     }
 
+    public void setOnGiveUpTouchEventListener(OnGiveUpTouchEventListener l) {
+        mGiveUpTouchEventListener = l;
+    }
+
+
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -87,11 +99,10 @@ public class MyStickyLayout extends LinearLayout {
                 mLastY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                int diffX = x - mLastInterceptX;
                 int diffY = y - mLastInterceptY;
-                if(mHeaderHeight == mOriginalHeight && diffY < -mTouchSlop){
+                if(status == STATUS_EXPANDED && diffY < -mTouchSlop){
                     intercept = true;
-                }else if( mHeaderHeight == 0 && diffY > mTouchSlop){
+                }else if( mGiveUpTouchEventListener != null && mGiveUpTouchEventListener.giveUpTouchEvent(ev) && diffY > mTouchSlop){
                     intercept = true;
                 }else {
                     intercept = false;
@@ -106,9 +117,7 @@ public class MyStickyLayout extends LinearLayout {
             default:
                 break;
         }
-
-        Log.d("TAG", "mHeaderHeight=" + mHeaderHeight +" mOriginalHeight = " +mOriginalHeight);
-
+        Log.d("TAG", "intercept=" + intercept );
         return intercept;
     }
 
@@ -116,12 +125,11 @@ public class MyStickyLayout extends LinearLayout {
     public boolean onTouchEvent(MotionEvent event) {
         int x = (int) event.getX();
         int y = (int) event.getY();
-        int height = 0;
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 break;
             case MotionEvent.ACTION_MOVE:
-                 height = y - mLastY;
+                 int height = y - mLastY;
                 mHeaderHeight += height;
                 setHeaderHeight(mHeaderHeight);
                 break;
@@ -137,10 +145,12 @@ public class MyStickyLayout extends LinearLayout {
 
     private void smoothShowOrHideHeader() {
         int height = mHeaderHeight;
-        if( height < mOriginalHeight * 0.5){
+        if( height <= mOriginalHeight * 0.5){
             height = 0;
+            status = STATUS_COLLAPSED;
         }else{
             height = mOriginalHeight;
+            status = STATUS_EXPANDED;
         }
         final int resultHeight = height;
         ValueAnimator valueAnimatorCompat = ValueAnimator.ofFloat(0,1);
@@ -149,9 +159,12 @@ public class MyStickyLayout extends LinearLayout {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int result = (int) ((resultHeight - mHeaderHeight) * animation.getAnimatedFraction());
-                mHeaderView.getLayoutParams().height = mHeaderHeight + result;
+                mHeaderHeight = mHeaderHeight + result;
+                mHeaderView.getLayoutParams().height = mHeaderHeight;
+                mHeaderView.requestLayout();
             }
         });
+        valueAnimatorCompat.start();
 
     }
 
@@ -163,6 +176,12 @@ public class MyStickyLayout extends LinearLayout {
             height = 0;
         }else if( height > mOriginalHeight){
             height = mOriginalHeight;
+        }
+
+        if (height == 0) {
+            status = STATUS_COLLAPSED;
+        } else {
+            status = STATUS_EXPANDED;
         }
 
         if(mHeaderView != null && mHeaderView.getLayoutParams() != null){
