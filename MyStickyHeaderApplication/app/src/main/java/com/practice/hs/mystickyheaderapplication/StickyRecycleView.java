@@ -12,6 +12,9 @@ import android.view.MotionEvent;
  */
 
 public class StickyRecycleView extends RecyclerView {
+    private int mLastY = 0;
+    private boolean isTop = false;
+    private int mHeaderHeight;
     public StickyRecycleView(Context context) {
         super(context);
     }
@@ -24,21 +27,23 @@ public class StickyRecycleView extends RecyclerView {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent e) {
-        Log.i("TAG","StickyRecycleView :   onInterceptTouchEvent ");
-        return true;
+    public void setHeaderHeight(int height){
+        this.mHeaderHeight = height;
+        this.isTop = true;
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        Log.i("TAG","StickyRecycleView :   dispatchTouchEvent ");
-        return super.dispatchTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        Log.i("TAG","StickyRecycleView :   onTouchEvent ");
-        return super.onTouchEvent(e);
+    public boolean onTouchEvent(MotionEvent ev) {
+        int y = (int) ev.getRawY();
+        if(ev.getAction() == MotionEvent.ACTION_MOVE) {
+            int deltaY = y - mLastY;
+            if( deltaY > 0 && isTop && mHeaderHeight <= 0){
+                isTop = false;
+                Log.i("TAG","StickyRecycleView  onTouchEvent  return false");
+                return false;
+            }
+        }
+        mLastY = y;
+        return super.onTouchEvent(ev);
     }
 }

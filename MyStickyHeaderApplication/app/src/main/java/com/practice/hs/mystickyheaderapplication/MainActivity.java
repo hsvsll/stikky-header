@@ -3,7 +3,6 @@ package com.practice.hs.mystickyheaderapplication;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -14,11 +13,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener ,MyStickyLayout.OnGiveUpTouchEventListener {
+public class MainActivity extends AppCompatActivity implements MyStickyLayout.OnGiveUpTouchEventListener
+,StickyContentFragment.OnRecycleMoveToTopEventListener {
     @BindView(R.id.tlTitle)
     TabLayout mTabLayoutTitle;
     @BindView(R.id.sticky_content)
-    ViewPager mViewPage;
+    CustomViewPage mViewPage;
     @BindView(R.id.sticky_layout)
     MyStickyLayout mLayout;
     @BindView(R.id.sticky_header)
@@ -44,8 +44,13 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         mTitleList = new ArrayList<>();
         mFragmentList = new ArrayList<>();
         mStickyContentLeftFragment = new StickyContentFragment();
+        mStickyContentLeftFragment.setOnRecycleMoveToTopEventListener(this);
+
         mStickyContentMiddleFragment = new StickyContentFragment();
+        mStickyContentMiddleFragment.setOnRecycleMoveToTopEventListener(this);
+
         mStickyContentRightFragment = new StickyContentFragment();
+        mStickyContentRightFragment.setOnRecycleMoveToTopEventListener(this);
         mTitleList.add("Left");
         mTitleList.add("Middle");
         mTitleList.add("Right");
@@ -53,23 +58,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         mFragmentList.add(mStickyContentMiddleFragment);
         mFragmentList.add(mStickyContentRightFragment);
         mStickyViewPageAdapter = new StickyViewPageAdapter(getSupportFragmentManager(),mFragmentList,mTitleList);
-        mViewPage.addOnPageChangeListener(this);
         mViewPage.setAdapter(mStickyViewPageAdapter);
         mTabLayoutTitle.setupWithViewPager(mViewPage);
         mLayout.setOnGiveUpTouchEventListener(this);
-    }
-
-
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
     }
 
     @Override
@@ -81,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         switch (event.getAction()){
             case MotionEvent.ACTION_MOVE:
                 int diff = y - mLastY;
-                if(diff > 0 && mHeaderTextView.getLayoutParams().height <= 0 && currentFragment.isScrollerToTop()){
+                if( mHeaderTextView.getLayoutParams().height <= 0 && currentFragment.isScrollerToTop()){
                     giveUp = true;
                 }else {
                     giveUp = false;
@@ -96,4 +87,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         return giveUp;
     }
 
+    @Override
+    public void moveToTopEvent() {
+        currentFragment = (StickyContentFragment) mStickyViewPageAdapter.getItem(mViewPage.getCurrentItem());
+        currentFragment.setHeaderHeight(mHeaderTextView.getLayoutParams().height);
+    }
 }

@@ -1,15 +1,14 @@
 package com.practice.hs.mystickyheaderapplication;
 
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.LinearLayout;
+import android.widget.Scroller;
 
 /**
  * Created by huha on 2017/5/3.
@@ -27,6 +26,8 @@ public class MyStickyLayout extends LinearLayout {
     private static final int STATUS_EXPANDED = 1;
     private static final int STATUS_COLLAPSED = 2;
 
+    private Scroller mScroller;
+
     public interface OnGiveUpTouchEventListener {
         boolean giveUpTouchEvent(MotionEvent event);
     }
@@ -35,20 +36,23 @@ public class MyStickyLayout extends LinearLayout {
 
     public MyStickyLayout(Context context) {
         super(context);
+        init(context,null);
     }
 
     public MyStickyLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context,attrs);
     }
 
     public MyStickyLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context,attrs);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public MyStickyLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+
+    private void init(Context context, AttributeSet attributeSet) {
     }
+
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
@@ -59,6 +63,7 @@ public class MyStickyLayout extends LinearLayout {
     }
 
     public void initData(){
+        mScroller = new Scroller(getContext());
         int headerId = getResources().getIdentifier("sticky_header","id",getContext().getPackageName());
         int contentId = getResources().getIdentifier("sticky_content","id",getContext().getPackageName());
         if(headerId != 0 && contentId != 0){
@@ -123,13 +128,24 @@ public class MyStickyLayout extends LinearLayout {
         return intercept;
     }
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        return super.dispatchTouchEvent(ev);
-    }
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        final int action = ev.getActionMasked();
+//        final boolean shouldRedirectDownTouch = action == MotionEvent.ACTION_MOVE
+////                && (!isIntercepted && isPrevIntercepted)
+//                && mHeaderHeight == 0;
+//
+//        Log.i("TAG", "shouldRedirectDownTouch : "+shouldRedirectDownTouch);
+//        if (shouldRedirectDownTouch) {
+//            mMotionEventHook.hook(ev, MotionEvent.ACTION_DOWN);
+//        }
+//        super.dispatchTouchEvent(ev);
+//        return true;
+//    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.i("TAG","StickyRecycleView  onTouchEvent  return false");
         int x = (int) event.getX();
         int y = (int) event.getY();
         switch (event.getAction()){
@@ -138,7 +154,12 @@ public class MyStickyLayout extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                  int height = y - mLastY;
                 mHeaderHeight += height;
-                setHeaderHeight(mHeaderHeight);
+                if(mHeaderHeight <= 0 &&  mGiveUpTouchEventListener != null && mGiveUpTouchEventListener.giveUpTouchEvent(event)){
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    dispatchTouchEvent(event);
+                }else {
+                    setHeaderHeight(mHeaderHeight);
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 //the header show or hide
@@ -148,6 +169,18 @@ public class MyStickyLayout extends LinearLayout {
         mLastX = x;
         mLastY = y;
         return true;
+    }
+
+    private void smoothScrollTo(){
+        int scrollY = getScrollY();
+        if( mHeaderHeight <= mOriginalHeight * 0.5){
+            status = STATUS_COLLAPSED;
+        }else{
+            status = STATUS_EXPANDED;
+        }
+        int deltaY = scrollY + mHeaderHeight;
+        mScroller.startScroll(0,scrollY, 0, deltaY, 500);
+        invalidate();
     }
 
     private void smoothShowOrHideHeader() {
@@ -198,4 +231,11 @@ public class MyStickyLayout extends LinearLayout {
         }
     }
 
+    @Override
+    public void computeScroll() {
+        if(mScroller.computeScrollOffset()){
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            postInvalidate();
+        }
+    }
 }

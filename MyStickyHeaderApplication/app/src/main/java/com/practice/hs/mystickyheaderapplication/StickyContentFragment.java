@@ -26,12 +26,22 @@ import butterknife.ButterKnife;
  */
 public class StickyContentFragment extends Fragment{
     @BindView(R.id.rvStickyContentList)
-    RecyclerView mRecycleView;
+    StickyRecycleView mRecycleView;
 
     private FullyLinearLayoutManager mFullyLinearLayoutManager;
     private StickyRecycleViewAdapter mStickyRecycleViewAdapter;
     private List<String> mData;
     private LinearLayoutManager mLinearLayoutManager;
+
+    public interface OnRecycleMoveToTopEventListener {
+        void moveToTopEvent();
+    }
+
+    public OnRecycleMoveToTopEventListener listener;
+
+    public void setOnRecycleMoveToTopEventListener(OnRecycleMoveToTopEventListener l) {
+        listener = l;
+    }
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -79,11 +89,13 @@ public class StickyContentFragment extends Fragment{
 //        mLinearLayoutManager.setScrollEnabled(false);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecycleView.setLayoutManager(mLinearLayoutManager);
-
         mRecycleView.setAdapter(mStickyRecycleViewAdapter);
         mRecycleView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if(recyclerView.canScrollVertically(-1)){
+                    listener.moveToTopEvent();
+                }
                 super.onScrolled(recyclerView, dx, dy);
             }
 
@@ -127,6 +139,10 @@ public class StickyContentFragment extends Fragment{
 
     public boolean isScrollerToTop(){
         return mLinearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0;
+    }
+
+    public void setHeaderHeight(int height){
+        mRecycleView.setHeaderHeight(height);
     }
 
 }

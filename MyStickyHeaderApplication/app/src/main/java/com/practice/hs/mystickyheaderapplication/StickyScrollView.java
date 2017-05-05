@@ -5,17 +5,18 @@ import android.content.Context;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.ScrollView;
+import android.widget.Scroller;
 
 /**
  * Created by qiyue on 17/4/30.
  *
  */
 public class StickyScrollView extends ScrollView {
-    //记录上次滑动坐标
-    private int mLastX = 0;
-    private int mLastY = 0;
     //记录上次拦击坐标
     private int mLastXIntercept = 0;
     private int mLastYIntercept = 0;
@@ -26,16 +27,38 @@ public class StickyScrollView extends ScrollView {
     private int mCurrentHeight = 464;
     private RecyclerView mRecyclerView;
 
+    private int mLastX = 0, mLastY = 0, mLastInterceptX = 0, mLastInterceptY = 0;
+    private int mTouchSlop;
+    private View mHeaderView;
+    private View mContentView;
+    private int mHeaderHeight;
+    private int mOriginalHeight;
+    private boolean mInitDataSucceed = false;
+    private int status = STATUS_EXPANDED;
+    private static final int STATUS_EXPANDED = 1;
+    private static final int STATUS_COLLAPSED = 2;
+
+    private Scroller mScroller;
+
+    private MyStickyLayout.OnGiveUpTouchEventListener mGiveUpTouchEventListener;
+
+    public void setOnGiveUpTouchEventListener(MyStickyLayout.OnGiveUpTouchEventListener l) {
+        mGiveUpTouchEventListener = l;
+    }
+
     public StickyScrollView(Context context) {
         super(context);
+        mScroller = new Scroller(getContext());
     }
 
     public StickyScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mScroller = new Scroller(getContext());
     }
 
     public StickyScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mScroller = new Scroller(getContext());
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -93,60 +116,117 @@ public class StickyScrollView extends ScrollView {
 //        }
 //    }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if( hasWindowFocus && (mContentView == null || mContentView == null )){
+            initData();
+        }
+    }
+
+    public void initData(){
+        int headerId = getResources().getIdentifier("sticky_header","id",getContext().getPackageName());
+        int contentId = getResources().getIdentifier("sticky_content","id",getContext().getPackageName());
+        if(headerId != 0 && contentId != 0){
+            mHeaderView = findViewById(headerId);
+            mContentView = findViewById(contentId);
+            mOriginalHeight = mHeaderView.getMeasuredHeight();
+            mHeaderHeight = mOriginalHeight;
+            mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+            if(mHeaderHeight > 0){
+                mInitDataSucceed = true;
+            }
+        }else {
+            new Throwable ("the view don't have id sticky_header and sticky_content ");
+        }
+    }
+
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean intercepted = false;
+        boolean intercept = false;
         int x = (int) ev.getX();
         int y = (int) ev.getY();
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
-                intercepted = false;
+                intercept = false;
+                mLastInterceptX = x;
+                mLastX = x;
+                mLastInterceptY = y;
+                mLastY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                mCurDiffX = x - mLastXIntercept;
-                mCurDiffY = y - mLastYIntercept;
-//                if(Math.abs(mCurDiffX) < Math.abs(mCurDiffY)){
-//                    Log.i("TAG"," mCurDiffY " +mCurDiffY);
-//                    intercepted = true;
-//                    mCurrentHeight += mCurDiffY;
-//                    if(mCurrentHeight <= 0){
-//                        intercepted = false;
-//                    }else if(mCurrentHeight >= maxHeight){
-//                        intercepted = false;
-//                    }else {
-//                        intercepted = true;
-//                    }
+                int diffX = x - mLastInterceptX;
+                int diffY = y - mLastInterceptY;
+                if(status == STATUS_EXPANDED && diffY < -mTouchSlop){
+                    intercept = true;
+                }else if( mGiveUpTouchEventListener != null && mGiveUpTouchEventListener.giveUpTouchEvent(ev) && diffY > mTouchSlop){
+                    intercept = true;
+                }else if(Math.abs(diffX) >= Math.abs(diffY)){
+                    intercept = false;
+                }
+//                else if( y <= getHeaderHeight()){
+//                    intercept = false;
 //                }
-//                else {
-//                    intercepted = false;
-//                }
-                intercepted = false;
+
                 break;
             case MotionEvent.ACTION_UP:
-                intercepted = false;
+                intercept = false;
+                mLastInterceptX = 0;
+                mLastInterceptY = 0;
                 break;
             default:
                 break;
         }
-        mLastXIntercept = x;
-        mLastYIntercept = y;
-        return intercepted;
+        Log.d("TAG", "intercept=" + intercept );
+        return intercept;
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        int x = (int) ev.getX();
-        int y = (int) ev.getY();
-        if(ev.getAction() == MotionEvent.ACTION_MOVE){
-//            scrollTo(0, y - mLastY);
-//            mLastY = y;
-//            Log.i("TAG","StickyScrollView  onTouchEvent  ACTION_MOVE");
-        }else if(ev.getAction() == MotionEvent.ACTION_DOWN){
-//            Log.i("TAG","StickyScrollView  onTouchEvent  ACTION_DOWN");
-        }else if(ev.getAction() == MotionEvent.ACTION_UP){
-//            Log.i("TAG","StickyScrollView  onTouchEvent  ACTION_UP");
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int height = y - mLastY;
+                smoothScrollTo(height);
+                break;
+            case MotionEvent.ACTION_UP:
+                //the header show or hide
+                int dy = y - mLastY;
+                smoothScrollTo(dy);
+                break;
         }
-        return super.onTouchEvent(ev);
+        mLastX = x;
+        mLastY = y;
+        return true;
+    }
+
+    private void smoothScrollTo(int dy){
+        int scrollY = getScrollY();
+        if( mHeaderHeight <= mOriginalHeight * 0.5){
+            status = STATUS_COLLAPSED;
+        }else{
+            status = STATUS_EXPANDED;
+        }
+
+//        int deltaY = scrollY + dy;
+        mScroller.startScroll(0,scrollY, 0, dy, 500);
+        invalidate();
+    }
+
+    @Override
+    public void computeScroll() {
+        if(mScroller.computeScrollOffset()){
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            postInvalidate();
+        }
     }
 }

@@ -30,7 +30,7 @@
             android:layout_below="@id/sticky_header"
             app:tabIndicatorColor="@android:color/darker_gray" />
 
-        <android.support.v4.view.ViewPager
+        <com.practice.hs.mystickyheaderapplication.CustomViewPage
             android:id="@+id/sticky_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
